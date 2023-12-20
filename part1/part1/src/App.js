@@ -1,32 +1,27 @@
 import { useState } from 'react'
 
-const Display = ({ counter }) => <div>{counter}</div>
+const Display = props => <div>{props.value}</div>
 
-const Button = ({ onSmash, text }) => <button onClick={onSmash}>{text}</button>
+const Button = (props) => (
+  <button onClick={props.handleClick}>
+    {props.text}
+  </button>
+)
 
 const App = () => {
-  const [ counter, setCounter ] = useState(0)
+  const [value, setValue] = useState(10)
 
-  const increaseByOne = () => setCounter(counter + 1)
-  const decreaseByOne = () => setCounter(counter - 1)
-  const setToZero = () => setCounter(0)
+  const setToValue = newValue => {
+    console.log('value now', newValue)
+    setValue(newValue)
+  }
 
   return (
     <div>
-      <Display counter={counter}/>
-
-      <Button
-        handleClick={increaseByOne}
-        text='plus'
-      />
-      <Button
-        handleClick={setToZero}
-        text='zero'
-      />
-      <Button
-        handleClick={decreaseByOne}
-        text='minus'
-      />
+      <Display value={value} />
+      <Button handleClick={() => setToValue(1000)} text="thousand" />
+      <Button handleClick={() => setToValue(0)} text="reset" />
+      <Button handleClick={() => setToValue(value + 1)} text="increment" />
     </div>
   )
 }
