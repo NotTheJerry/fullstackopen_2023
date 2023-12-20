@@ -15,7 +15,6 @@ const App = () => {
   const [selected, setSelected] = useState(0)
   const [points, setPoints] = useState({ 0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0 });
   const [indexMayor, setIndexMayor] = useState(0)
-  const [valorMayor, setValorMayor] = useState(0)
 
   const random = () => {
     const num_random = Math.floor(Math.random() * 8)
@@ -25,17 +24,14 @@ const App = () => {
   }
 
   const votar= () => {
-    setPoints({ ...points, [selected]: points[selected]+1 })
+    const updatedPoints = { ...points, [selected]:points[selected] + 1 }
+    setPoints(updatedPoints)
     
-    const valores = Object.values({ ...points, [selected]: points[selected] + 1 })
+    const valores = Object.values(updatedPoints)
+    const maximoValor = Math.max(...valores)
+    const indiceMayor = valores.indexOf(maximoValor)
 
-    for(let i=0; i < valores.length; i++){
-      if(valores[i] > valorMayor){
-        setIndexMayor(i)
-        setValorMayor(valores[i])
-      }
-    }
-
+    setIndexMayor(indiceMayor)
   }
 
 
