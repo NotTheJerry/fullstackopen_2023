@@ -1,74 +1,82 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import Pais from './components/PaisWithWeather'
-import PaisWithWeather from './components/PaisWithWeather'
-
+import Person from './components/Person'
+import PersonForm from './components/PersonForm'
+import Filter from './components/Filter'
+import personsServices from './services/persons'
 
 const App = () => {
-  const [paises, setPaises] = useState([]) 
+  const [persons, setPersons] = useState([]) 
+  const [ newName, setNewName ] = useState('')
+  const [ newNumero, setNewNumero ] = useState('')
   const [filtro, setFiltro] = useState('')
 
   const hook = () => {
-    axios
-    .get("https://restcountries.com/v3.1/all")
-    .then(response => {
-      setPaises(response.data)
-    })
+    personsServices.getAll()
+    .then(response => setPersons(response))
   }
 
   useEffect(hook, [])
 
-  const paisesFiltrados = paises.filter(pais => pais.name.common.toUpperCase().includes(filtro.toUpperCase()))
-  
+  const agregarPersona = (event) => {
+    event.preventDefault()
+    const nuevaPersona = {
+      name: newName,
+      number: newNumero
+    }
+
+    const person = persons.find(person => person.name === newName)
+
+    if(person){
+      if(window.confirm(`Do you want to update de contact "${person.name}"?`)){
+        personsServices.actualizarPersona(person.id, nuevaPersona)
+        .then(updatedPerson => setPersons(persons.map(per => per.id !== updatedPerson.id ? per : updatedPerson)))
+      }
+    }
+    else {
+      personsServices.createPerson(nuevaPersona)
+      .then(nuevaPersona => setPersons(persons.concat(nuevaPersona)))
+
+      setNewName('')
+      setNewNumero('')
+    }
+    
+  }
+
+  const toogleDelete = (id, name) => {
+    if(window.confirm(`Do you want to the delete the contact "${name}"?`)){
+      personsServices.deletePerson(id)
+      setPersons(persons.filter(person => person.id !== id))
+    }
+  }
+
+  const handleNuevoNombre = (event) => {
+    setNewName(event.target.value)
+  }
+
+  const handleNuevoNumero = (event) => {
+    setNewNumero(event.target.value)
+  }
+
   const handleFiltro = (event) => {
     setFiltro(event.target.value)
   }
 
-  const toggleInfo = (name) => {
-    const pais = paises.find(pais => pais.name.common === name)
-    const cambioPais = { ...pais, importancia: !pais.importancia }
-    setPaises(paises.map(pais => pais.name.common !== name ? pais : cambioPais))
-  }
-
-
-  const mostrarPaises = () => {
-    if(!filtro) {
-      return (<div>You haven't typed anything</div>)
-    }
-
-    if(paisesFiltrados.length > 10){
-      return (
-        <div>
-          Too many matches
-        </div>
-      )
-    }
-
-    if(paisesFiltrados.length > 1 && paisesFiltrados.length <=10){
-      return paisesFiltrados.map(pais => {
-          return (
-            <div key={pais.name.common}>
-              {pais.name.common + ' '}
-              <button onClick={() => toggleInfo(pais.name.common) }>{pais.importancia ? 'show less' : 'show'}</button>
-              {pais.importancia ? <Pais pais={pais}/> : ''}
-            </div>
-          )
-        }
-      )
-    }
-
-    if(paisesFiltrados.length === 1){
-     return <PaisWithWeather pais={paisesFiltrados[0]} />
-    }
-    
-  } //Fin funcion mostrarPaises
+  const personsFiltrated = persons.filter(person => person.name.toUpperCase() === filtro.toUpperCase())
+  
 
   return (
     <div>
-      <div>find countries <input value={filtro} onChange={handleFiltro}/> </div> <br />
-      {mostrarPaises()}
+      <h2>Phonebook</h2>
+      <Filter filtro={filtro} handleFiltro={handleFiltro} personsFiltrated={personsFiltrated}/>
+      <h2>add a new</h2>
+      <PersonForm agregarPersona={agregarPersona} 
+      newName={newName} handleNuevoNombre={handleNuevoNombre} 
+      newNumero={newNumero} handleNuevoNumero={handleNuevoNumero}
+      />
+      <h2>Numbers</h2>
+      {persons.map(person => <Person key={person.id} name={person.name} number={person.number} toogleDelete={() => toogleDelete(person.id, person.name)}/>)}
     </div>
   )
-} //Fin componente App
+}
 
 export default App
