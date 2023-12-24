@@ -1,21 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import Pais from './components/PaisWithWeather'
+import PaisWithWeather from './components/PaisWithWeather'
 
-const Pais = ({pais}) => {
-    const languages = Object.values(pais.languages)
-    return (
-      <div>
-        <h1>{pais.name.common}</h1>
-        <div>capital: {pais.capital}</div>
-        <div>population: {pais.population}</div>
-        <h3>languages</h3>
-        <ul>{languages.map(language => (
-          <li key={language}>{language}</li>
-        ))}</ul>
-        <img src={pais.flags.png} alt={"Imagen de la bandera de " + pais.name.common} />
-      </div>
-    )
-}
 
 const App = () => {
   const [paises, setPaises] = useState([]) 
@@ -30,6 +17,8 @@ const App = () => {
   }
 
   useEffect(hook, [])
+
+  const paisesFiltrados = paises.filter(pais => pais.name.common.toUpperCase().includes(filtro.toUpperCase()))
   
   const handleFiltro = (event) => {
     setFiltro(event.target.value)
@@ -47,8 +36,6 @@ const App = () => {
       return (<div>You haven't typed anything</div>)
     }
 
-    const paisesFiltrados = paises.filter(pais => pais.name.common.toUpperCase().includes(filtro.toUpperCase()))
-
     if(paisesFiltrados.length > 10){
       return (
         <div>
@@ -63,7 +50,7 @@ const App = () => {
             <div key={pais.name.common}>
               {pais.name.common + ' '}
               <button onClick={() => toggleInfo(pais.name.common) }>{pais.importancia ? 'show less' : 'show'}</button>
-              {pais.importancia ? <Pais pais={pais} /> : ''}
+              {pais.importancia ? <Pais pais={pais}/> : ''}
             </div>
           )
         }
@@ -71,10 +58,10 @@ const App = () => {
     }
 
     if(paisesFiltrados.length === 1){
-     return <Pais pais={paisesFiltrados[0]} />
+     return <PaisWithWeather pais={paisesFiltrados[0]} />
     }
     
-  }
+  } //Fin funcion mostrarPaises
 
   return (
     <div>
@@ -82,6 +69,6 @@ const App = () => {
       {mostrarPaises()}
     </div>
   )
-}
+} //Fin componente App
 
 export default App
