@@ -1,6 +1,13 @@
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
+
 app.use(express.json())
+
+morgan.token('content-value', (request) => JSON.stringify(request.body) )
+
+app.use( morgan(':method :url :status :res[content-length] - :response-time ms :content-value', { skip: (req, res) => req.method !== 'POST' }))
+
 
 let persons = [
     {
@@ -89,3 +96,4 @@ const PORT = 3001
 app.listen(PORT, ()=> {
     console.log(`Server running on port ${PORT}`);
 })
+  
