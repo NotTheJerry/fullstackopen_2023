@@ -2,13 +2,17 @@ import React, { useEffect, useState } from 'react'
 import Person from './components/Person'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
+import Notification from './components/Notification'
 import personsServices from './services/persons'
+import './index.css'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumero, setNewNumero ] = useState('')
   const [filtro, setFiltro] = useState('')
+  const [message, setMessage] = useState('')
+  const [className, setClassName] = useState('')
 
   const hook = () => {
     personsServices.getAll()
@@ -30,12 +34,17 @@ const App = () => {
       if(window.confirm(`Do you want to update de contact "${person.name}"?`)){
         personsServices.actualizarPersona(person.id, nuevaPersona)
         .then(updatedPerson => setPersons(persons.map(per => per.id !== updatedPerson.id ? per : updatedPerson)))
+        setClassName('message')
+        setMessage(`${person.name} contact was successfully updated`)
+        setTimeout(() => setMessage(null), 5000)
       }
     }
     else {
       personsServices.createPerson(nuevaPersona)
       .then(nuevaPersona => setPersons(persons.concat(nuevaPersona)))
-
+      setClassName('message')
+      setMessage(`${newName} was succesfully added to your contacts`)
+      setTimeout(() => setMessage(null), 5000)
       setNewName('')
       setNewNumero('')
     }
@@ -44,7 +53,8 @@ const App = () => {
 
   const toogleDelete = (id, name) => {
     if(window.confirm(`Do you want to the delete the contact "${name}"?`)){
-      personsServices.deletePerson(id)
+      personsServices.deletePerson(id).then(r => r.data).catch(error => { setClassName('error'); setMessage(`Information of ${name} has already been removed from the server`)})
+      setTimeout(() => setMessage(''), 5000)
       setPersons(persons.filter(person => person.id !== id))
     }
   }
@@ -67,6 +77,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} className={className}/>
       <Filter filtro={filtro} handleFiltro={handleFiltro} personsFiltrated={personsFiltrated}/>
       <h2>add a new</h2>
       <PersonForm agregarPersona={agregarPersona} 
